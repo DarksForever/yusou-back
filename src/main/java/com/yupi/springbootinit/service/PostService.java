@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.yupi.springbootinit.model.dto.post.PostQueryRequest;
 import com.yupi.springbootinit.model.entity.Post;
 import com.yupi.springbootinit.model.vo.PostVO;
+
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -57,4 +58,13 @@ public interface PostService extends IService<Post> {
      * @return
      */
     Page<PostVO> getPostVOPage(Page<Post> postPage, HttpServletRequest request);
+
+    /**
+     * 分页查询帖子脱敏信息
+     *
+     * @param postQueryRequest
+     * @param request
+     * @return
+     */
+    Page<PostVO> listPostVoByPage(PostQueryRequest postQueryRequest, HttpServletRequest request);
 }
