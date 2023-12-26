@@ -21,7 +21,7 @@ import java.util.Map;
  * @author liaochangyi
  * @date 2023-12-26  11:23
  */
-@Component
+//@Component
 @Slf4j
 public class FetchInitPostList implements CommandLineRunner {
 
@@ -56,9 +56,7 @@ public class FetchInitPostList implements CommandLineRunner {
         }
         //数据入库
         boolean saveResult = postService.saveBatch(postList);
-        if (saveResult) {
-            log.info("获取初始化帖子列表成功, 条数 = {}", postList.size());
-        } else {
+        if(!saveResult) {
             log.error("获取初始化帖子列表失败");
         }
     }

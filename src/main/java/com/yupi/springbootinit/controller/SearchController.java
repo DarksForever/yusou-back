@@ -15,6 +15,7 @@ import com.yupi.springbootinit.model.vo.SearchVO;
 import com.yupi.springbootinit.model.vo.UserVO;
 import com.yupi.springbootinit.service.PictureService;
 import com.yupi.springbootinit.service.PostService;
+import com.yupi.springbootinit.service.SearchService;
 import com.yupi.springbootinit.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,80 +40,10 @@ import java.util.concurrent.ExecutionException;
 public class SearchController {
 
     @Resource
-    private PictureService pictureService;
-
-    @Resource
-    private UserService userService;
-
-    @Resource
-    private PostService postService;
+    private SearchService searchService;
 
     @PostMapping("/all")
     public BaseResponse<SearchVO> searchAll(@RequestBody SearchRequest searchRequest, HttpServletRequest request) {
-        String searchText = searchRequest.getSearchText();
-        String searchType = searchRequest.getSearchType();
-        SearchTypeEnum searchTypeEnum = SearchTypeEnum.getEnumByValue(searchType);
-        //查询类型为空，默认为查全部
-        if (null == searchTypeEnum) {
-            CompletableFuture<Page<Picture>> pictureTask = CompletableFuture.supplyAsync(() -> {
-                Page<Picture> picturePage = pictureService.listPictures(1, 10, searchText);
-                return picturePage;
-            });
-
-            CompletableFuture<Page<UserVO>> userTask = CompletableFuture.supplyAsync(() -> {
-                UserQueryRequest userQueryRequest = new UserQueryRequest();
-                userQueryRequest.setUserName(searchText);
-                Page<UserVO> userVOPage = userService.listUserVOByPage(userQueryRequest);
-                return userVOPage;
-            });
-
-            CompletableFuture<Page<PostVO>> postTask = CompletableFuture.supplyAsync(() -> {
-                PostQueryRequest postQueryRequest = new PostQueryRequest();
-                postQueryRequest.setSearchText(searchText);
-                Page<PostVO> postVOPage = postService.listPostVoByPage(postQueryRequest, request);
-                return postVOPage;
-            });
-
-            CompletableFuture.allOf(pictureTask, userTask, postTask).join();
-
-            // 等待所有异步任务完成并获取结果
-            Page<Picture> picturePage = null;
-            try {
-                picturePage = pictureTask.get();
-                Page<UserVO> userVOPage = userTask.get();
-                Page<PostVO> postVOPage = postTask.get();
-                SearchVO searchVO = SearchVO.builder()
-                        .userVoList(userVOPage.getRecords())
-                        .postVoList(postVOPage.getRecords())
-                        .pictureList(picturePage.getRecords())
-                        .build();
-                return ResultUtils.success(searchVO);
-            } catch (Exception e) {
-                log.error("聚合查询异常", e);
-                throw new BusinessException(ErrorCode.OPERATION_ERROR, "查询异常");
-            }
-        } else {
-            SearchVO searchVo = new SearchVO();
-            switch (searchTypeEnum) {
-                case POST:
-                    PostQueryRequest postQueryRequest = new PostQueryRequest();
-                    postQueryRequest.setSearchText(searchText);
-                    Page<PostVO> postVOPage = postService.listPostVoByPage(postQueryRequest, request);
-                    searchVo.setPostVoList(postVOPage.getRecords());
-                    break;
-                case USER:
-                    UserQueryRequest userQueryRequest = new UserQueryRequest();
-                    userQueryRequest.setUserName(searchText);
-                    Page<UserVO> userVOPage = userService.listUserVOByPage(userQueryRequest);
-                    searchVo.setUserVoList(userVOPage.getRecords());
-                    break;
-                case PICTURE:
-                    Page<Picture> picturePage = pictureService.listPictures(1, 10, searchText);
-                    searchVo.setPictureList(picturePage.getRecords());
-                    break;
-                default:
-            }
-            return ResultUtils.success(searchVo);
-        }
+        return ResultUtils.success(searchService.searchAll(searchRequest, request));
     }
 }
