@@ -163,3 +163,29 @@ PUT post_v1
 // todo 取消注释开启任务
 //@Component
 ```
+
+## 目录结构
+
+├─annotation  注解
+├─aop   切面，包含权限校验和日志
+├─common   通用工具类
+├─config    配置类
+├─constant   常量类
+├─controller
+├─esdao    Es
+├─exception   
+├─job
+│  ├─cycle    重复任务
+│  └─once    单次任务
+├─manager     Cos
+├─mapper
+├─model
+│  ├─dto  
+│  ├─entity
+│  ├─enums
+│  └─vo
+├─service
+│  └─impl
+├─utils
+└─wxmp
+    └─handler

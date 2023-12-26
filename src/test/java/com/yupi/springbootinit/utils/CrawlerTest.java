@@ -4,9 +4,14 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.yupi.springbootinit.model.entity.Picture;
 import com.yupi.springbootinit.model.entity.Post;
 import com.yupi.springbootinit.service.PostService;
 import lombok.RequiredArgsConstructor;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -57,5 +62,25 @@ public class CrawlerTest {
         //数据入库
         boolean saveResult = postService.saveBatch(postList);
         Assertions.assertTrue(saveResult);
+    }
+
+    @Test
+    void testFetchPicture() throws Exception{
+        int current = 1;
+        String url = "https://www.bing.com/images/search?q=小黑子&first=" + current;
+        Document doc = Jsoup.connect(url).get();
+        Elements newsHeadlines = doc.select(".iuscp.isv");
+        List<Picture> pictureList=new ArrayList<>();
+        for (Element headline : newsHeadlines) {
+            //取图片地址
+            String m = headline.select(".iusc").get(0).attr("m");
+            Map<String, Object> map = JSONUtil.toBean(m, Map.class);
+            String murl = (String) map.get("murl");
+            // 取标题
+            String title = headline.select(".inflnk").get(0).attr("aria-label");
+            Picture picture = Picture.builder().url(murl).title(title).build();
+            pictureList.add(picture);
+        }
+        System.out.println(pictureList);
     }
 }
