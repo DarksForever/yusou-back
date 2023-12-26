@@ -8,6 +8,7 @@ import com.yupi.springbootinit.model.entity.Post;
 import com.yupi.springbootinit.service.PostService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import java.util.Map;
  * @author liaochangyi
  * @date 2023-12-26  11:23
  */
+@Component
 @Slf4j
 public class FetchInitPostList implements CommandLineRunner {
 
