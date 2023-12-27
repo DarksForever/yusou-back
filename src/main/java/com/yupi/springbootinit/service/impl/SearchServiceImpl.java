@@ -2,10 +2,12 @@ package com.yupi.springbootinit.service.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yupi.springbootinit.common.ErrorCode;
+import com.yupi.springbootinit.datasource.DataSource;
 import com.yupi.springbootinit.datasource.picture.PictureDataSource;
 import com.yupi.springbootinit.datasource.post.PostDataSource;
 import com.yupi.springbootinit.datasource.user.UserDataSource;
 import com.yupi.springbootinit.exception.BusinessException;
+import com.yupi.springbootinit.exception.ThrowUtils;
 import com.yupi.springbootinit.model.dto.post.PostQueryRequest;
 import com.yupi.springbootinit.model.dto.search.SearchRequest;
 import com.yupi.springbootinit.model.dto.user.UserQueryRequest;
@@ -16,6 +18,7 @@ import com.yupi.springbootinit.model.vo.SearchVO;
 import com.yupi.springbootinit.model.vo.UserVO;
 import com.yupi.springbootinit.service.SearchService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -43,6 +46,7 @@ public class SearchServiceImpl implements SearchService {
     public SearchVO searchAll(SearchRequest searchRequest, HttpServletRequest request) {
         String searchText = searchRequest.getSearchText();
         String searchType = searchRequest.getSearchType();
+        ThrowUtils.throwIf(StringUtils.isBlank(searchType), ErrorCode.PARAMS_ERROR);
         SearchTypeEnum searchTypeEnum = SearchTypeEnum.getEnumByValue(searchType);
         long pageNum = searchRequest.getCurrent();
         long pageSize = searchRequest.getPageSize();
@@ -54,15 +58,11 @@ public class SearchServiceImpl implements SearchService {
             });
 
             CompletableFuture<Page<UserVO>> userTask = CompletableFuture.supplyAsync(() -> {
-                UserQueryRequest userQueryRequest = new UserQueryRequest();
-                userQueryRequest.setUserName(searchText);
                 Page<UserVO> userVOPage = userDataSource.doSearch(searchText, pageNum, pageSize);
                 return userVOPage;
             });
 
             CompletableFuture<Page<PostVO>> postTask = CompletableFuture.supplyAsync(() -> {
-                PostQueryRequest postQueryRequest = new PostQueryRequest();
-                postQueryRequest.setSearchText(searchText);
                 Page<PostVO> postVOPage = postDataSource.doSearch(searchText, pageNum, pageSize);
                 return postVOPage;
             });
